@@ -1,0 +1,17 @@
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Camaras.exe.config
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Camaras.exe
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Camaras.pdb
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\obj\Debug\Camaras.csprojResolveAssemblyReference.cache
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\obj\Debug\Camaras.Form1.resources
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\obj\Debug\Camaras.Properties.Resources.resources
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\obj\Debug\Camaras.csproj.GenerateResource.Cache
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\obj\Debug\Camaras.exe
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\obj\Debug\Camaras.pdb
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Microsoft.Expression.Encoder.dll
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Microsoft.Expression.Encoder.Types.dll
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Microsoft.Expression.Encoder.Utilities.dll
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Microsoft.Expression.Encoder.xml
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Microsoft.Expression.Encoder.Types.xml
+c:\users\jesus\documents\visual studio 2012\Projects\Camaras\Camaras\bin\Debug\Microsoft.Expression.Encoder.Utilities.xml
+C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camaras\Camaras\bin\Debug\ManagedWifi.dll
+C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camaras\Camaras\bin\Debug\ManagedWifi.pdb
