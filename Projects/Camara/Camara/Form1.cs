@@ -68,7 +68,7 @@ namespace Camara
                     Grabar();
 
                     TareaGrabacionOrmal = new System.Windows.Forms.Timer();
-                    TareaGrabacionOrmal.Interval = 1000 * 60 * 60;
+                    TareaGrabacionOrmal.Interval = 1000 * 60 * 10;
                     TareaGrabacionOrmal.Tick += new EventHandler(this.grabacion);
 
                     TareaGrabacionOrmal.Enabled = true;
