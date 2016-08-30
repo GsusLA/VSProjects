@@ -33,25 +33,24 @@ namespace Camara
                         {
                             latitud = resultado.GetDouble("latitud");
                             longitud = resultado.GetDouble("longitud");
+                            
                             return true;
                         }
-                        else
-                        {
-
-                        }
+                       
                     }
+                    conect.Close();
                 }
 
             }
             catch (Exception)
             {
-
+                conect.Close();
                 throw;
             }
             return false;
         }
 
-        public double getlLatitud() {
+        public double getLatitud() {
             return latitud;
         }
         public double getLongitud() {

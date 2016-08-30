@@ -13,3 +13,6 @@ c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\bin\Debug\Mic
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\bin\Debug\Microsoft.Expression.Encoder.xml
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\bin\Debug\Microsoft.Expression.Encoder.Types.xml
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\bin\Debug\Microsoft.Expression.Encoder.Utilities.xml
+C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camara\Camara\bin\Debug\ManagedWifi.dll
+C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camara\Camara\bin\Debug\ManagedWifi.pdb
+C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camara\Camara\bin\Debug\MySql.Data.Entity.EF5.dll

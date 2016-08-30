@@ -13,6 +13,9 @@ using Microsoft.Expression.Encoder.Devices;
 using Microsoft.Expression.Encoder.Live;
 using Microsoft.Expression.Encoder;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Net;
+using System.IO;
 
 namespace Camara
 {
@@ -22,14 +25,24 @@ namespace Camara
         private LiveDeviceSource _deviceSource;
         FileArchivePublishFormat fileOut;
         CamConfig camara;
+        Alarma alarma;
         string[] datoCamaras = null;
-        System.Windows.Forms.Timer TareaGrabacionOrmal;
+        string[] nombres = new string[3];
+        Boolean f = true;
+        double lat , longt;
+        string fileName = "";
+        System.Windows.Forms.Timer TareaGrabacionNormal;
+        System.Windows.Forms.Timer TareaVerificarAlarma;
+        System.Windows.Forms.Timer TareaGrabacionAlarma;
         public Form1()
         {
             InitializeComponent();
             
             // Inicializa las clases y metodos necesarios
+            
             camara = new CamConfig();
+            alarma = new Alarma();
+            tareasProgramadas();
             buscarCamaras();
             InicioAutomatico();
         }
@@ -67,11 +80,10 @@ namespace Camara
                     Preview();
                     Grabar();
 
-                    TareaGrabacionOrmal = new System.Windows.Forms.Timer();
-                    TareaGrabacionOrmal.Interval = 1000 * 60 * 10;
-                    TareaGrabacionOrmal.Tick += new EventHandler(this.grabacion);
+                    
 
-                    TareaGrabacionOrmal.Enabled = true;
+                    TareaGrabacionNormal.Enabled = true;
+                    TareaVerificarAlarma.Enabled = true;
                     //MessageBox.Show("si hay datos de dispositivo", "Mensaje");
                 }
 
@@ -110,7 +122,8 @@ namespace Camara
 
 
                     // Se indica en que direccion se desea guardar el archivo, el formato y el nombre
-                    fileOut.OutputFileName = String.Format("D:\\VIDEO\\WebCam {0:yyyyMMdd_hhmmss}.wmv", DateTime.Now);
+                    fileName = String.Format("D:\\VIDEO\\WebCam {0:yyyyMMdd_hhmmss}.wmv", DateTime.Now);
+                    fileOut.OutputFileName = fileName;
 
                     // Se adjunta el formato de salida del video
                     _job.PublishFormats.Add(fileOut);
@@ -215,6 +228,152 @@ namespace Camara
         {
             Grabar();
             Preview();
+            Grabar();
+        }
+        
+        private void tareasProgramadas() {
+            /**En este metodo se configuran las tareas programadas que se ejecutaran cada tiempo determinado, estas
+             tareas se especificaran de acuerdo a cada acción*/
+
+            //Tarea para iniciar grabacion normal automatica
+            TareaGrabacionNormal = new System.Windows.Forms.Timer();
+            TareaGrabacionNormal.Interval = 1000 * 60 * 10;
+            TareaGrabacionNormal.Tick += new EventHandler(this.grabacion);
+
+            TareaVerificarAlarma = new System.Windows.Forms.Timer();
+            TareaVerificarAlarma.Interval = 1000 * 20;
+            TareaVerificarAlarma.Tick += new EventHandler(this.verificarAlarma);
+
+
+        }
+        /** En esta region estan los metodos que controlan los pasos necesarios para la grabacion y envio de videos
+         * a la pagina de pagocel en caso de que se active la alarma de la aplicacion, estara controlado por la tarea   */
+        #region 
+        /** Este metodo verifica en la base de datos de Pagocel si una alarma esta activada, en esta version la verificacion se hace 
+         * directamentte en la base de datos de pagocel, cuando la verificacion se haga por medio del BlueTooth del stick, los cambios 
+         * necesarios para recibir la alarma de la tablet se haran en este metodo. */
+        private void verificarAlarma(object sender, EventArgs e)
+        {
+            if (alarma.revEstado())
+            {
+                if (f)
+                {
+                    try
+                    {
+                        /** string[] laa = alarm.getLatitud().ToString().Split(',');
+                        string[] loo = alarm.getLongitud().ToString().Split(',');
+                        lat = laa[0] + "." + laa[1];
+                        longt = loo[0] + "." + loo[1];
+                         */
+                        lat = alarma.getLatitud();
+                        longt = alarma.getLongitud();
+                    }
+                    catch (Exception err)
+                    {
+                        MessageBox.Show("Datos: \nLatitud = "+ lat + "longitud = "+longt, "Error de Coordenadas");
+                        throw;
+                    }
+                    MessageBox.Show("Inicia rutina de alarma", "Error de Coordenadas");
+                    //rutinaAlarma();
+                }
+                f = false;
+            }
+            else
+            {
+                f = true;
+            }
+
+        }
+        /** Metodo que hace la grabacion de 3 secciones de video de 30 segundos cada una, una vez generados lo videos
+         * se enviaran a Pagocel, donde se notificara la alarma por mail al administrador adjuntando los links de los 
+         * videos y la ubicacion de la alarma en google maps, estos datos estaran incluidos en el cuerpo del mail.*/
+        async void rutinaAlarma() {
+            TareaGrabacionNormal.Enabled = false;
+            await Task.Delay(2000);
+            Grabar();
+            await Task.Delay(1000);
+            Preview();
+            await Task.Delay(1000);
+            Grabar();//Inicia 1er video 
+            await Task.Delay(500);
+            nombres[0] = fileName;
+            await Task.Delay(1000 * 30);
+            Grabar();//termina 1er video
+            await Task.Delay(1000);
+            Preview();
+            await Task.Delay(1000);
+            Grabar();//Inicia 2o video 
+            await Task.Delay(500);
+            nombres[1] = fileName;
+            await Task.Delay(1000 * 30);
+            Grabar();//termina 2o video
+            await Task.Delay(1000);
+            Preview();
+            await Task.Delay(1000);
+            Grabar();//Inicia 3er video 
+            await Task.Delay(500);
+            nombres[2] = fileName;
+            await Task.Delay(1000 * 30);
+            Grabar();//termina 3er video
+            await Task.Delay(1000);
+            Preview();
+            guardar(nombres);
+            Thread subir = new Thread(new ThreadStart(subirVideos));
+            subir.Start();
+            Grabar();//Reiniciamos actividad normal de grabacion
+            TareaGrabacionNormal.Enabled = true;
+        }
+        // Este metodo sube los videos a Pagocel de acuerdo a la lista generada  
+        public void subirVideos()
+        {
+            try
+            {
+                for (int i = 0; i < nombres.Length; i++)
+                {
+                    WebClient client = new WebClient();
+                    string myFile = @"D:\VIDEO\" + nombres[i];
+                    //string myFile = @"camaras.txt";
+                    client.Credentials = CredentialCache.DefaultCredentials;
+                    client.UploadFile(@"http://www.pagocel.club/Patrullas/subir.php?id=" + nombres[i], "POST", myFile);
+
+                    client.Dispose();
+                }
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("" + err.ToString());
+            }
+
+            try
+            {
+
+                WebClient client = new WebClient();
+                //string myFile = @"C:\VIDEO\video1.wmv";
+                string myFile = @"nombres.txt";
+                client.Credentials = CredentialCache.DefaultCredentials;
+                client.UploadFile(@"http://www.pagocel.club/Patrullas/subir_video.php?lat=" + lat + "&log=" + longt, "POST", myFile);
+                //MessageBox.Show("Enviado");
+                client.Dispose();
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("" + err.ToString());
+            }
+        }
+        // Este metodo guarda el nombre de los videos en un archivo .txt
+        public void guardar(string[] data)
+        {
+            StreamWriter datos = File.CreateText("nombres.txt");
+            datos.WriteLine(data[0]);
+            datos.WriteLine(data[1]);
+            datos.WriteLine(data[2]);
+            datos.Flush();
+            datos.Close();
+        }
+        #endregion
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
             Grabar();
         }
     }
