@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Net;
 using System.IO;
+using System.Diagnostics;
 
 namespace Camara
 {
@@ -26,14 +27,17 @@ namespace Camara
         FileArchivePublishFormat fileOut;
         CamConfig camara;
         Alarma alarma;
+        ManageWifi wifi;
         string[] datoCamaras = null;
         string[] nombres = new string[3];
         Boolean f = true;
+        Boolean w = true;
         double lat , longt;
         string fileName = "";
+        private Process[] processes;
         System.Windows.Forms.Timer TareaGrabacionNormal;
         System.Windows.Forms.Timer TareaVerificarAlarma;
-        System.Windows.Forms.Timer TareaGrabacionAlarma;
+        System.Windows.Forms.Timer TareaTransmicionVideos;
         public Form1()
         {
             InitializeComponent();
@@ -80,11 +84,11 @@ namespace Camara
                     Preview();
                     Grabar();
 
-                    
+                    Log("Inicio Automatico...", fileName);
 
                     TareaGrabacionNormal.Enabled = true;
                     TareaVerificarAlarma.Enabled = true;
-                    //MessageBox.Show("si hay datos de dispositivo", "Mensaje");
+                    TareaTransmicionVideos.Enabled = true;
                 }
 
             }
@@ -122,7 +126,7 @@ namespace Camara
 
 
                     // Se indica en que direccion se desea guardar el archivo, el formato y el nombre
-                    fileName = String.Format("D:\\VIDEO\\WebCam {0:yyyyMMdd_hhmmss}.wmv", DateTime.Now);
+                    fileName = String.Format("D:\\VIDEO\\WebCam-{0:yyyyMMdd_hhmmss}.wmv", DateTime.Now);
                     fileOut.OutputFileName = fileName;
 
                     // Se adjunta el formato de salida del video
@@ -226,23 +230,36 @@ namespace Camara
          * tarea programada*/
         private void grabacion(object sender, EventArgs e)
         {
-            Grabar();
-            Preview();
-            Grabar();
+            try
+            {
+                Grabar();
+                Preview();
+                Grabar();
+                Log("Inicia Grabacion normal...", fileName);
+            }
+            catch (Exception err)
+            {
+                Log(err.ToString()+"..REBOOTING SYSTEM..", fileName);
+                System.Diagnostics.Process.Start("cerrar.bat");
+                
+            }
         }
-        
-        private void tareasProgramadas() {
-            /**En este metodo se configuran las tareas programadas que se ejecutaran cada tiempo determinado, estas
+        /**En este metodo se configuran las tareas programadas que se ejecutaran cada tiempo determinado, estas
              tareas se especificaran de acuerdo a cada acción*/
-
+        private void tareasProgramadas() {
             //Tarea para iniciar grabacion normal automatica
             TareaGrabacionNormal = new System.Windows.Forms.Timer();
-            TareaGrabacionNormal.Interval = 1000 * 60 * 10;
+            TareaGrabacionNormal.Interval = 1000 * 60 * 60;
             TareaGrabacionNormal.Tick += new EventHandler(this.grabacion);
-
+            // Tarea que verifica la alarma de la tablet y en caso de activarse inicia el grabado de las secciones
+            // de 30 segundos de video y el envio de estas a el mail del administrador.
             TareaVerificarAlarma = new System.Windows.Forms.Timer();
             TareaVerificarAlarma.Interval = 1000 * 20;
             TareaVerificarAlarma.Tick += new EventHandler(this.verificarAlarma);
+            // Tarea que envia los videos al servidor de la estacion principal cuando esta en el alcance del wifi.
+            TareaTransmicionVideos = new System.Windows.Forms.Timer();
+            TareaTransmicionVideos.Interval = 1000 * 60;
+            TareaTransmicionVideos.Tick += new EventHandler(this.enviarVideos);
 
 
         }
@@ -274,7 +291,7 @@ namespace Camara
                         throw;
                     }
                     MessageBox.Show("Inicia rutina de alarma", "Error de Coordenadas");
-                    //rutinaAlarma();
+                    rutinaAlarma();
                 }
                 f = false;
             }
@@ -372,8 +389,72 @@ namespace Camara
         }
         #endregion
 
+        /** Metodo para enviar los videos guardados al servidor en la estacion central al momento de detectar
+         * la red wifi configurada*/ 
+        private void enviarVideos(object sender, EventArgs e)
+        {
+            wifi = new ManageWifi();
+            string[] videos = GetFileNames();
+            if(videos.Length >3 && wifi.scanWifi()){
+                TareaTransmicionVideos.Enabled = false;
+                for (int i = 0; i < videos.Length; i++)
+                {
+                    EjecutarBat("mover.bat", videos[i]);
+                    Log("Archivo "+videos[i]+"  Correctamente", "Envio de Videos al Servidor.");
+                }
+            }
+
+            if (!wifi.scanWifi()) {
+                TareaTransmicionVideos.Enabled = true;
+            }
+
+
+        }
+
+        private void EjecutarBat(string pathArchivoBat, string args)
+        {
+            Process proceso = new Process();
+            proceso.StartInfo.FileName = pathArchivoBat;
+            proceso.StartInfo.Arguments = args;
+            proceso.Start();
+            proceso.WaitForExit(); //Espera a que termine la ejecución del archivo .bat
+            //MessageBox.Show("Proceso Terminado", "Aviso");
+
+        }
+
+
+        /* Metodo que guarda en un archivo log.txt los eventos de errores y de inicio de grabacion de cada
+         * video y asi llevar un segimiento de los errores y de la grabacion.*/
+        public static void Log(string logMessage, string videoFile)
+        {
+            using (StreamWriter w = File.AppendText("log.txt"))
+            {
+                w.Write("Log Entry   : ");
+                w.WriteLine("{0} {1}", DateTime.Now.ToLongTimeString(),
+                    DateTime.Now.ToLongDateString());
+                w.WriteLine("Video File  :{0}", videoFile);
+                w.WriteLine("Message     :{0}", logMessage);
+                w.WriteLine("-------------------------------\r\n");
+            }
+        }
+
+        public void moverVideos() {
+            System.Diagnostics.Process.Start("mover.bat");
+        }
+
+        private string[] GetFileNames()
+        {
+            string[] files = Directory.GetFiles("D:\\VIDEO", "*.wmv");
+            for (int i = 0; i < files.Length; i++)
+            {
+                files[i] = Path.GetFileName(files[i]);
+            }
+            return files;
+        }
+
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if(btnGrabar.Text.Equals("Detener"))
             Grabar();
         }
     }

@@ -1,7 +1,6 @@
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\bin\Debug\Camara.exe.config
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\bin\Debug\Camara.exe
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\bin\Debug\Camara.pdb
-c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\obj\Debug\Camara.csprojResolveAssemblyReference.cache
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\obj\Debug\Camara.Form1.resources
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\obj\Debug\Camara.Properties.Resources.resources
 c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\obj\Debug\Camara.csproj.GenerateResource.Cache
@@ -16,3 +15,4 @@ c:\users\jesus\documents\visual studio 2012\Projects\Camara\Camara\bin\Debug\Mic
 C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camara\Camara\bin\Debug\ManagedWifi.dll
 C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camara\Camara\bin\Debug\ManagedWifi.pdb
 C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camara\Camara\bin\Debug\MySql.Data.Entity.EF5.dll
+C:\Users\Jesus\Documents\Visual Studio 2012\Projects\Camara\Camara\obj\Debug\Camara.csprojResolveAssemblyReference.cache

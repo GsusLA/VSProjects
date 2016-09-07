@@ -18,11 +18,12 @@ namespace Camara
         {
             string conexion = "datasource=www.pagocel.club;port=3306;username=cliente;password=c1234;database=db_patrullas";
             string query = "SELECT latitud,longitud,status FROM tbl_flotilla WHERE placa = 'U-002';";
-            MySqlConnection conect = new MySqlConnection(conexion);
-            MySqlCommand comando = new MySqlCommand(query, conect);
-            MySqlDataReader resultado;
+            MySqlConnection conect = null;
             try
             {
+                conect = new MySqlConnection(conexion);
+                MySqlCommand comando = new MySqlCommand(query, conect);
+                MySqlDataReader resultado;
                 conect.Open();
                 resultado = comando.ExecuteReader();
                 if (resultado.HasRows)
@@ -45,7 +46,7 @@ namespace Camara
             catch (Exception)
             {
                 conect.Close();
-                throw;
+                
             }
             return false;
         }
